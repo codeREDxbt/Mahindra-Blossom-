@@ -1,0 +1,73 @@
+/* Overlay Modal Styles */
+.overlay-backdrop {
+    background-color: rgba(27, 32, 33, 0.75);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.overlay-backdrop.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.overlay-content {
+    background-color: #fffcfd;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.overlay-backdrop.is-visible .overlay-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Form Styles */
+.input-field {
+    width: 100%;
+    border-radius: 4px;
+    background-color: rgba(255, 252, 253, 0.5);
+    border: 1px solid rgba(22, 22, 22, 0.12);
+    padding: 12px 16px;
+    font-family: 'Instrument Sans', sans-serif;
+    color: #161616;
+    transition: border-color 0.2s;
+}
+
+.input-field:focus {
+    border-color: #ee1258;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(238, 18, 88, 0.1);
+}
+
+.checkbox-custom {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgba(22, 22, 22, 0.12);
+    border-radius: 4px;
+    display: grid;
+    place-content: center;
+}
+
+.checkbox-custom::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em white;
+    transform-origin: center;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.checkbox-custom:checked {
+    background-color: #ee1258;
+    border-color: #ee1258;
+}
+
+.checkbox-custom:checked::before {
+    transform: scale(1);
+}

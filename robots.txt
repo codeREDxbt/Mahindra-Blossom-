@@ -1,0 +1,16 @@
+# Robots.txt for Mahindra Blossom
+# https://mahindrablossom.com/
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://mahindrablossom.com/sitemap.xml
+
+# Disallow sensitive directories
+Disallow: /node_modules/
+Disallow: /dist/
+Disallow: /.git/
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
