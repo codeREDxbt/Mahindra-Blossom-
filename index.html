@@ -163,74 +163,252 @@
         }
 
         /* ============================================
-           HERO GATE OPENING ANIMATION
-           GPU-accelerated, composited, zero CLS
+           HERO ORNATE DOOR OPENING ANIMATION
+           3D rotateY swing, GPU-composited, zero CLS
            ============================================ */
-        .hero-gate {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 50%;
-            z-index: 20;
-            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%);
-            will-change: transform;
-            backface-visibility: hidden;
-            contain: strict;
-        }
-        .hero-gate::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: linear-gradient(to bottom, transparent, rgba(237,50,55,0.6), rgba(237,50,55,0.8), rgba(237,50,55,0.6), transparent);
-            box-shadow: 0 0 15px rgba(237,50,55,0.4), 0 0 30px rgba(237,50,55,0.2);
-        }
-        .hero-gate--left {
-            left: 0;
-            animation: gateOpenLeft 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
-        }
-        .hero-gate--left::after { right: 0; }
-        .hero-gate--right {
-            right: 0;
-            animation: gateOpenRight 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
-        }
-        .hero-gate--right::after { left: 0; }
-        /* Subtle metallic texture */
-        .hero-gate::before {
-            content: '';
+
+        /* Perspective wrapper centered over hero */
+        .hero-doors-container {
             position: absolute;
             inset: 0;
-            background: repeating-linear-gradient(
-                90deg,
-                transparent,
-                transparent 60px,
-                rgba(255,255,255,0.02) 60px,
-                rgba(255,255,255,0.02) 61px
-            );
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             pointer-events: none;
         }
-        @keyframes gateOpenLeft {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-105%); }
+
+        /* The arch frame that clips the doors */
+        .hero-doors-arch {
+            position: relative;
+            width: min(520px, 80vw);
+            height: min(700px, 90vh);
+            perspective: 1200px;
+            display: flex;
+            overflow: hidden;
+            border-radius: 260px 260px 0 0;
+            /* Subtle arch frame shadow */
+            box-shadow:
+                inset 0 0 0 6px #e8e4df,
+                inset 0 0 0 10px #d5d0ca,
+                0 0 60px rgba(0,0,0,0.5),
+                0 0 120px rgba(0,0,0,0.3);
         }
-        @keyframes gateOpenRight {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(105%); }
+
+        /* Each door panel */
+        .hero-door {
+            position: relative;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(175deg, #f8f7f5 0%, #edeae6 40%, #e5e2dd 100%);
+            will-change: transform;
+            backface-visibility: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.06);
         }
-        /* Hero content fades in after gates open */
+
+        .hero-door--left {
+            transform-origin: left center;
+            animation: doorSwingLeft 1.8s cubic-bezier(0.23, 1, 0.32, 1) 0.6s forwards;
+            border-right: 1px solid #d5d0ca;
+        }
+
+        .hero-door--right {
+            transform-origin: right center;
+            animation: doorSwingRight 1.8s cubic-bezier(0.23, 1, 0.32, 1) 0.6s forwards;
+            border-left: 1px solid #d5d0ca;
+        }
+
+        @keyframes doorSwingLeft {
+            0%   { transform: rotateY(0deg); }
+            100% { transform: rotateY(-105deg); }
+        }
+        @keyframes doorSwingRight {
+            0%   { transform: rotateY(0deg); }
+            100% { transform: rotateY(105deg); }
+        }
+
+        /* ---- Ornate panel structure (upper large + lower small) ---- */
+        .door-panel {
+            position: absolute;
+            left: 12%;
+            right: 12%;
+            border: 2px solid #d8d4ce;
+            border-radius: 4px;
+            background: linear-gradient(180deg, #f5f3f0 0%, #edebe8 100%);
+            box-shadow:
+                inset 0 1px 2px rgba(255,255,255,0.7),
+                inset 0 -1px 2px rgba(0,0,0,0.04),
+                0 1px 4px rgba(0,0,0,0.08);
+        }
+        .door-panel--upper {
+            top: 8%;
+            height: 52%;
+        }
+        .door-panel--lower {
+            bottom: 6%;
+            height: 22%;
+        }
+
+        /* Inner recessed rectangle inside each panel */
+        .door-panel-inner {
+            position: absolute;
+            inset: 10%;
+            border: 1.5px solid #cdc8c2;
+            border-radius: 3px;
+            background: linear-gradient(180deg, #f0eee9 0%, #e8e5e0 100%);
+            box-shadow:
+                inset 0 2px 6px rgba(0,0,0,0.05),
+                inset 0 -1px 3px rgba(255,255,255,0.5);
+        }
+
+        /* Decorative medallion/cartouche at top of upper panel */
+        .door-medallion {
+            position: absolute;
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44%;
+            height: 26%;
+            border: 1.5px solid #d0cbc4;
+            border-radius: 6px 6px 50% 50%;
+            background: linear-gradient(180deg, #f2f0ec, #e9e6e1);
+            box-shadow:
+                inset 0 1px 4px rgba(0,0,0,0.05),
+                0 1px 2px rgba(255,255,255,0.6);
+        }
+
+        /* Ornamental scroll flourishes on the medallion */
+        .door-medallion::before,
+        .door-medallion::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            width: 30%;
+            height: 16px;
+            border-bottom: 1.5px solid #d0cbc4;
+            border-radius: 0 0 50% 50%;
+        }
+        .door-medallion::before { left: 10%; }
+        .door-medallion::after  { right: 10%; }
+
+        /* Corner decorative flourishes on panels */
+        .door-corner {
+            position: absolute;
+            width: 20%;
+            height: 12%;
+            border: 1px solid #d5d0ca;
+            opacity: 0.7;
+        }
+        .door-corner--tl { top: 4%; left: 4%; border-radius: 4px 0 12px 0; border-right: none; border-bottom: none; }
+        .door-corner--tr { top: 4%; right: 4%; border-radius: 0 4px 0 12px; border-left: none; border-bottom: none; }
+        .door-corner--bl { bottom: 4%; left: 4%; border-radius: 0 12px 0 4px; border-right: none; border-top: none; }
+        .door-corner--br { bottom: 4%; right: 4%; border-radius: 12px 0 4px 0; border-left: none; border-top: none; }
+
+        /* Brass door handle */
+        .door-handle {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 40px;
+            border-radius: 3px;
+            background: linear-gradient(180deg, #d4a574 0%, #c9956b 30%, #b8835a 70%, #a57349 100%);
+            box-shadow:
+                1px 1px 4px rgba(0,0,0,0.25),
+                inset 0 1px 2px rgba(255,255,255,0.3);
+        }
+        .hero-door--left .door-handle {
+            right: 8%;
+        }
+        .hero-door--right .door-handle {
+            left: 8%;
+        }
+
+        /* Handle escutcheon plate (brass keyhole plate) */
+        .door-handle::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 64px;
+            border-radius: 8px;
+            background: linear-gradient(180deg, #d4a574 0%, #b8835a 100%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            z-index: -1;
+        }
+
+        /* Handle knob */
+        .door-handle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 8px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #c9956b, #d4a574, #c9956b);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .hero-door--left .door-handle::after {
+            right: -2px;
+        }
+        .hero-door--right .door-handle::after {
+            left: -2px;
+        }
+
+        /* Arch frame decorative molding lines */
+        .hero-doors-arch::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 264px 264px 0 0;
+            border: 3px solid rgba(255,255,255,0.15);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Floor reflection below doors */
+        .hero-doors-floor {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(560px, 84vw);
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(200,195,188,0.3), transparent);
+            border-radius: 0;
+            filter: blur(4px);
+            pointer-events: none;
+        }
+
+        /* Hero content fades in after doors swing open */
         .hero-content-reveal {
             opacity: 0;
-            animation: heroReveal 0.8s ease-out 1.2s forwards;
+            animation: heroReveal 0.8s ease-out 2.0s forwards;
         }
         @keyframes heroReveal {
             0% { opacity: 0; transform: translateY(10px); }
             100% { opacity: 1; transform: translateY(0); }
         }
-        /* Reduced motion: skip gate animation */
+
+        /* Reduced motion: skip door animation entirely */
         @media (prefers-reduced-motion: reduce) {
-            .hero-gate { display: none !important; }
+            .hero-doors-container { display: none !important; }
             .hero-content-reveal { opacity: 1 !important; animation: none !important; transform: none !important; }
+        }
+
+        /* Responsive: smaller doors on mobile */
+        @media (max-width: 640px) {
+            .hero-doors-arch {
+                width: 85vw;
+                height: 75vh;
+                border-radius: 42.5vw 42.5vw 0 0;
+            }
+            .hero-doors-arch::before {
+                border-radius: calc(42.5vw + 4px) calc(42.5vw + 4px) 0 0;
+            }
         }
     </style>
 </head>
@@ -301,9 +479,45 @@
             
             <!-- Gradient Overlay - Figma: 685x753, rotated -90deg -->
             
-            <!-- Hero Gate Animation: CSS-only GPU-composited panels -->
-            <div class="hero-gate hero-gate--left" aria-hidden="true"></div>
-            <div class="hero-gate hero-gate--right" aria-hidden="true"></div>
+            <!-- Hero Ornate Door Animation: 3D rotateY swing, CSS-only, GPU-composited -->
+            <div class="hero-doors-container" aria-hidden="true">
+                <div class="hero-doors-arch">
+                    <!-- Left Door -->
+                    <div class="hero-door hero-door--left">
+                        <div class="door-panel door-panel--upper">
+                            <div class="door-panel-inner">
+                                <div class="door-medallion"></div>
+                            </div>
+                            <div class="door-corner door-corner--tl"></div>
+                            <div class="door-corner door-corner--tr"></div>
+                            <div class="door-corner door-corner--bl"></div>
+                            <div class="door-corner door-corner--br"></div>
+                        </div>
+                        <div class="door-panel door-panel--lower">
+                            <div class="door-panel-inner"></div>
+                        </div>
+                        <div class="door-handle"></div>
+                    </div>
+                    <!-- Right Door -->
+                    <div class="hero-door hero-door--right">
+                        <div class="door-panel door-panel--upper">
+                            <div class="door-panel-inner">
+                                <div class="door-medallion"></div>
+                            </div>
+                            <div class="door-corner door-corner--tl"></div>
+                            <div class="door-corner door-corner--tr"></div>
+                            <div class="door-corner door-corner--bl"></div>
+                            <div class="door-corner door-corner--br"></div>
+                        </div>
+                        <div class="door-panel door-panel--lower">
+                            <div class="door-panel-inner"></div>
+                        </div>
+                        <div class="door-handle"></div>
+                    </div>
+                </div>
+                <!-- Floor reflection -->
+                <div class="hero-doors-floor"></div>
+            </div>
 
             <div class="absolute left-0 top-0 w-[685px] h-[753px] origin-top-left -rotate-90">
                 <div class="w-full h-full bg-gradient-to-t from-transparent via-black/50 to-black"></div>
