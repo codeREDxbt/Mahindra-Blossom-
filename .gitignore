@@ -9,3 +9,6 @@ build/
 .env
 .env.local
 .env.*.local
+
+# Large source GIF (55MB) - use compressed MP4/WebM instead
+assets/images/gate opening gif.gif
