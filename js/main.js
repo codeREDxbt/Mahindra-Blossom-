@@ -3,8 +3,6 @@
  * Performance-optimized: minimal third-party scripts, lazy loading
  */
 
-console.log('Mahindra Blossom site loaded');
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // ============================================
@@ -48,9 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Initial state and scroll listener
+    // Initial state and scroll listener (RAF-throttled for performance)
     updateNavbar();
-    window.addEventListener('scroll', updateNavbar, { passive: true });
+    let navbarTicking = false;
+    window.addEventListener('scroll', () => {
+        if (!navbarTicking) {
+            requestAnimationFrame(() => {
+                updateNavbar();
+                navbarTicking = false;
+            });
+            navbarTicking = true;
+        }
+    }, { passive: true });
 
     // ============================================
     // SMOOTH SCROLL FOR ANCHOR LINKS

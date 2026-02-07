@@ -39,23 +39,23 @@
     <meta name="twitter:image" content="https://mahindrablossom.com/assets/images/hero-bg.webp">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/logo-mahindra.webp">
-    <link rel="icon" type="image/png" sizes="16x16" href="./assets/images/logo-mahindra.webp">
+    <link rel="icon" type="image/webp" sizes="32x32" href="./assets/images/logo-mahindra.webp">
+    <link rel="icon" type="image/webp" sizes="16x16" href="./assets/images/logo-mahindra.webp">
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/images/logo-mahindra.webp">
 
     <!-- Preconnect to external origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Preload critical fonts -->
-    <link rel="preload" as="style"
-        href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700&display=swap">
+    <!-- Fonts: non-blocking load via print-to-all media swap -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700&display=swap">
+        href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700&display=swap"></noscript>
 
     <!-- Preload LCP hero image -->
     <link rel="preload" as="image" href="./assets/images/hero-bg.webp"
-        fetchpriority="high">
+        type="image/webp" fetchpriority="high">
 
     <!-- Stylesheet -->
     <link href="./css/output.css" rel="stylesheet">
@@ -161,6 +161,77 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
+        /* ============================================
+           HERO GATE OPENING ANIMATION
+           GPU-accelerated, composited, zero CLS
+           ============================================ */
+        .hero-gate {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            z-index: 20;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%);
+            will-change: transform;
+            backface-visibility: hidden;
+            contain: strict;
+        }
+        .hero-gate::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, transparent, rgba(237,50,55,0.6), rgba(237,50,55,0.8), rgba(237,50,55,0.6), transparent);
+            box-shadow: 0 0 15px rgba(237,50,55,0.4), 0 0 30px rgba(237,50,55,0.2);
+        }
+        .hero-gate--left {
+            left: 0;
+            animation: gateOpenLeft 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
+        }
+        .hero-gate--left::after { right: 0; }
+        .hero-gate--right {
+            right: 0;
+            animation: gateOpenRight 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
+        }
+        .hero-gate--right::after { left: 0; }
+        /* Subtle metallic texture */
+        .hero-gate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 60px,
+                rgba(255,255,255,0.02) 60px,
+                rgba(255,255,255,0.02) 61px
+            );
+            pointer-events: none;
+        }
+        @keyframes gateOpenLeft {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-105%); }
+        }
+        @keyframes gateOpenRight {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(105%); }
+        }
+        /* Hero content fades in after gates open */
+        .hero-content-reveal {
+            opacity: 0;
+            animation: heroReveal 0.8s ease-out 1.2s forwards;
+        }
+        @keyframes heroReveal {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        /* Reduced motion: skip gate animation */
+        @media (prefers-reduced-motion: reduce) {
+            .hero-gate { display: none !important; }
+            .hero-content-reveal { opacity: 1 !important; animation: none !important; transform: none !important; }
+        }
     </style>
 </head>
 
@@ -229,6 +300,11 @@
             </div>
             
             <!-- Gradient Overlay - Figma: 685x753, rotated -90deg -->
+            
+            <!-- Hero Gate Animation: CSS-only GPU-composited panels -->
+            <div class="hero-gate hero-gate--left" aria-hidden="true"></div>
+            <div class="hero-gate hero-gate--right" aria-hidden="true"></div>
+
             <div class="absolute left-0 top-0 w-[685px] h-[753px] origin-top-left -rotate-90">
                 <div class="w-full h-full bg-gradient-to-t from-transparent via-black/50 to-black"></div>
             </div>
@@ -236,7 +312,7 @@
             <!-- Content Container - Figma: Frame 16, positioned at left:2, top:153 -->
             <div class="absolute left-[2px] top-[153px] lg:top-[153px] z-10 px-6 lg:px-0">
                 <!-- Left Content Block - Figma: Frame 16, w-636, gap-40 -->
-                <div class="flex flex-col gap-[40px] w-full lg:w-[636px] text-white scroll-animate">
+                <div class="flex flex-col gap-[40px] w-full lg:w-[636px] text-white hero-content-reveal">
                     <!-- Title Block - Figma: Frame 7, gap-16, centered, px-80 -->
                     <div class="flex flex-col gap-[16px] items-center px-4 lg:pl-[80px] lg:pr-0">
                         <!-- Figma: Frame 6, gap-4, w-476 -->
@@ -250,7 +326,7 @@
                         </div>
                         
                         <!-- Decorative Divider - Figma: 476x31 -->
-                        <img src="./assets/images/divider-ornament.webp" alt="" role="presentation"
+                        <img loading="lazy" decoding="async" src="./assets/images/divider-ornament.webp" alt="" role="presentation"
                             width="476" height="31" class="w-full lg:w-[476px] h-auto object-contain">
                         
                         <!-- Description - Figma: 345px wide, centered -->
@@ -381,7 +457,7 @@
             <div class="absolute inset-0 pointer-events-none">
                 <div class="absolute inset-0 bg-[#fffcfd]"></div>
                 <div class="absolute inset-0 opacity-5 overflow-hidden">
-                    <img src="./assets/images/mpovement-texture.webp" alt="" class="absolute h-[115%] left-[-65%] top-0 w-[230%] max-w-none object-cover">
+                    <img loading="lazy" decoding="async" src="./assets/images/mpovement-texture.webp" alt="" class="absolute h-[115%] left-[-65%] top-0 w-[230%] max-w-none object-cover">
                 </div>
             </div>
 
@@ -563,7 +639,7 @@
                     </p>
                 </div>
                 <div class="relative w-full aspect-[1571/102]">
-                    <img src="./assets/images/divider-ornament.webp" alt="" class="absolute inset-0 w-full h-full object-cover">
+                    <img loading="lazy" decoding="async" src="./assets/images/divider-ornament.webp" alt="" class="absolute inset-0 w-full h-full object-cover">
                 </div>
                 <div class="flex flex-col gap-[24px] w-full">
                     <div class="flex flex-col xl:flex-row gap-[24px] w-full">
@@ -590,13 +666,13 @@
                             </div>
                             <div class="flex flex-col lg:flex-row gap-[24px] h-auto lg:h-[280px]">
                                 <div class="relative w-full lg:w-[540px] h-[280px] rounded-[24px] overflow-hidden group hover-lift">
-                                    <img src="./assets/images/amenities-multipurpose-court.webp" alt="Multipurpose Court" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <img loading="lazy" decoding="async" src="./assets/images/amenities-multipurpose-court.webp" alt="Multipurpose Court" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                                     <div class="absolute bottom-0 left-0 right-0 h-[82px] bg-gradient-to-b from-transparent to-black flex items-end justify-center px-[24px] py-[12px]">
                                         <p class="font-sans font-semibold text-[24px] text-white">Multipurpose Court</p>
                                     </div>
                                 </div>
                                 <div class="relative w-full lg:w-[263px] h-[280px] rounded-[24px] overflow-hidden group hover-lift">
-                                    <img src="./assets/images/amenities-modern-bedroom.webp" alt="Modern Bedroom" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <img loading="lazy" decoding="async" src="./assets/images/amenities-modern-bedroom.webp" alt="Modern Bedroom" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                                     <div class="absolute bottom-0 left-0 right-0 h-[82px] bg-gradient-to-b from-transparent to-black flex items-end justify-center px-[24px] py-[12px]">
                                         <p class="font-sans font-semibold text-[24px] text-white">Modern Bedroom</p>
                                     </div>
@@ -606,19 +682,19 @@
                     </div>
                     <div class="flex flex-col lg:flex-row gap-[24px] h-auto lg:h-[280px]">
                         <div class="relative w-full lg:w-[397.333px] h-[280px] rounded-[24px] overflow-hidden group hover-lift">
-                            <img src="./assets/images/amenities-gym.webp" alt="Gym" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <img loading="lazy" decoding="async" src="./assets/images/amenities-gym.webp" alt="Gym" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute bottom-0 left-0 right-0 h-[82px] bg-gradient-to-b from-transparent to-black flex items-end justify-center px-[24px] py-[12px]">
                                 <p class="font-sans font-semibold text-[24px] text-white">Gym</p>
                             </div>
                         </div>
                         <div class="relative w-full lg:w-[397.333px] h-[280px] rounded-[24px] overflow-hidden group hover-lift">
-                            <img src="./assets/images/amenities-cricket-nets.webp" alt="Cricket Nets" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <img loading="lazy" decoding="async" src="./assets/images/amenities-cricket-nets.webp" alt="Cricket Nets" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute bottom-0 left-0 right-0 h-[82px] bg-gradient-to-b from-transparent to-black flex items-end justify-center px-[24px] py-[12px]">
                                 <p class="font-sans font-semibold text-[24px] text-white">Cricket Nets</p>
                             </div>
                         </div>
                         <div class="relative w-full lg:w-[397.333px] h-[280px] rounded-[24px] overflow-hidden group hover-lift">
-                            <img src="./assets/images/amenities-pool.webp" alt="1/2 Olympic size pool" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <img loading="lazy" decoding="async" src="./assets/images/amenities-pool.webp" alt="1/2 Olympic size pool" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute bottom-0 left-0 right-0 h-[82px] bg-gradient-to-b from-transparent to-black flex items-end justify-center px-[24px] py-[12px]">
                                 <p class="font-sans font-semibold text-[24px] text-white">1/2 Olympic size pool</p>
                             </div>
@@ -626,25 +702,25 @@
                     </div>
                     <div class="flex flex-col lg:flex-row gap-[24px] h-auto lg:h-[280px]">
                         <div class="relative w-full lg:w-[292px] h-[280px] rounded-[24px] overflow-hidden group hover-lift">
-                            <img src="./assets/images/amenities-landscaped-gardens.webp" alt="Landscaped Gardens" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <img loading="lazy" decoding="async" src="./assets/images/amenities-landscaped-gardens.webp" alt="Landscaped Gardens" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute bottom-0 left-0 right-0 h-[82px] bg-gradient-to-b from-transparent to-black flex items-end justify-center px-[24px] py-[12px]">
                                 <p class="font-sans font-semibold text-[24px] text-white">Landscaped Gardens</p>
                             </div>
                         </div>
                         <div class="relative w-full lg:w-[292px] h-[280px] rounded-[24px] overflow-hidden group hover-lift">
-                            <img src="./assets/images/amenities-ventilated-flats.webp" alt="Ventilated Flats" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <img loading="lazy" decoding="async" src="./assets/images/amenities-ventilated-flats.webp" alt="Ventilated Flats" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute bottom-0 left-0 right-0 h-[82px] bg-gradient-to-b from-transparent to-black flex items-end justify-center px-[24px] py-[12px]">
                                 <p class="font-sans font-semibold text-[24px] text-white">Ventilated Flats</p>
                             </div>
                         </div>
                         <div class="relative w-full lg:w-[292px] h-[280px] rounded-[24px] overflow-hidden group hover-lift">
-                            <img src="./assets/images/amenities-large-balcony.webp" alt="Large Balcony" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <img loading="lazy" decoding="async" src="./assets/images/amenities-large-balcony.webp" alt="Large Balcony" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute bottom-0 left-0 right-0 h-[82px] bg-gradient-to-b from-transparent to-black flex items-end justify-center px-[24px] py-[12px]">
                                 <p class="font-sans font-semibold text-[24px] text-white">Large Balcony</p>
                             </div>
                         </div>
                         <div class="relative w-full lg:w-[292px] h-[280px] rounded-[24px] overflow-hidden group hover-lift">
-                            <img src="./assets/images/amenities-jogging-track.webp" alt="Jogging Track" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <img loading="lazy" decoding="async" src="./assets/images/amenities-jogging-track.webp" alt="Jogging Track" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute bottom-0 left-0 right-0 h-[82px] bg-gradient-to-b from-transparent to-black flex items-end justify-center px-[24px] py-[12px]">
                                 <p class="font-sans font-semibold text-[24px] text-white">Jogging Track</p>
                             </div>
@@ -664,18 +740,18 @@
                     <p class="font-sans italic text-[18px] leading-[1.45] tracking-[2.88px] uppercase text-center w-full">Smart layouts that maximize space, light, and everyday comfort.</p>
                 </div>
                 <div class="relative w-full aspect-[1571/102]">
-                    <img src="./assets/images/divider-ornament.webp" alt="" class="absolute inset-0 w-full h-full object-cover">
+                    <img loading="lazy" decoding="async" src="./assets/images/divider-ornament.webp" alt="" class="absolute inset-0 w-full h-full object-cover">
                 </div>
                 <div class="flex flex-wrap gap-[48px_24px] pt-[24px] justify-center">
                     <div class="relative flex flex-col items-center justify-center w-full sm:w-[calc(50%-12px)] lg:w-[397.333px] h-[320px] p-[40px] rounded-[24px] bg-white shadow-lg">
-                        <img src="./assets/images/plan-master.webp" alt="Master Plan" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
+                        <img loading="lazy" decoding="async" src="./assets/images/plan-master.webp" alt="Master Plan" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
                         <div class="absolute top-[-24px] left-1/2 -translate-x-1/2 bg-white rounded-[100px] px-[24px] py-[12px] shadow-[1px_3px_8px_0px_rgba(0,0,0,0.16)] z-20">
                             <p class="font-sans font-semibold text-[18px] tracking-[1.44px] text-[#4b4d4c]">MASTER PLAN</p>
                         </div>
                         <button class="view-plan-btn relative z-10 border border-[#4b4d4c] rounded-full px-[20px] py-[8px] min-h-[48px] bg-white text-[#4b4d4c] font-semibold text-[16px] shadow-sm hover:shadow-md hover:bg-[#4b4d4c] hover:text-white transition-all duration-300" data-plan="./assets/images/plan-master.webp" data-title="Master Plan">View Plan</button>
                     </div>
                     <div class="relative flex flex-col items-center justify-center w-full sm:w-[calc(50%-12px)] lg:w-[397.333px] h-[320px] p-[40px] rounded-[24px] bg-white shadow-lg">
-                        <img src="./assets/images/plan-2bhk.webp" alt="2 BHK" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
+                        <img loading="lazy" decoding="async" src="./assets/images/plan-2bhk.webp" alt="2 BHK" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
                         <div class="absolute top-[-24px] left-1/2 -translate-x-1/2 bg-white rounded-[100px] px-[24px] py-[12px] shadow-[1px_3px_8px_0px_rgba(0,0,0,0.16)] z-20">
                             <p class="font-sans font-semibold text-[18px] tracking-[1.44px] text-[#4b4d4c]">2 BHK</p>
                         </div>
@@ -683,7 +759,7 @@
                         <button class="view-plan-btn relative z-40 border border-[#4b4d4c] rounded-full px-[20px] py-[8px] min-h-[48px] bg-white text-[#4b4d4c] font-semibold text-[16px] shadow-sm hover:shadow-md hover:bg-[#4b4d4c] hover:text-white transition-all duration-300" data-plan="./assets/images/plan-2bhk.webp" data-title="2 BHK Floor Plan">View Plan</button>
                     </div>
                     <div class="relative flex flex-col items-center justify-center w-full sm:w-[calc(50%-12px)] lg:w-[397.333px] h-[320px] p-[40px] rounded-[24px] bg-white shadow-lg">
-                        <img src="./assets/images/plan-2bhk-large.webp" alt="2 BHK Large" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
+                        <img loading="lazy" decoding="async" src="./assets/images/plan-2bhk-large.webp" alt="2 BHK Large" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
                         <div class="absolute top-[-24px] left-1/2 -translate-x-1/2 bg-white rounded-[100px] px-[24px] py-[12px] shadow-[1px_3px_8px_0px_rgba(0,0,0,0.16)] z-20">
                             <p class="font-sans font-semibold text-[18px] tracking-[1.44px] text-[#4b4d4c]">2 BHK (Large)</p>
                         </div>
@@ -691,21 +767,21 @@
                         <button class="view-plan-btn relative z-40 border border-[#4b4d4c] rounded-full px-[20px] py-[8px] min-h-[48px] bg-white text-[#4b4d4c] font-semibold text-[16px] shadow-sm hover:shadow-md hover:bg-[#4b4d4c] hover:text-white transition-all duration-300" data-plan="./assets/images/plan-2bhk-large.webp" data-title="2 BHK Large Floor Plan">View Plan</button>
                     </div>
                     <div class="relative flex flex-col items-center justify-center w-full sm:w-[calc(50%-12px)] lg:w-[397.333px] h-[320px] p-[40px] rounded-[24px] bg-white shadow-lg">
-                        <img src="./assets/images/plan-3bhk.webp" alt="3 BHK" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
+                        <img loading="lazy" decoding="async" src="./assets/images/plan-3bhk.webp" alt="3 BHK" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
                         <div class="absolute top-[-24px] left-1/2 -translate-x-1/2 bg-white rounded-[100px] px-[24px] py-[12px] shadow-[1px_3px_8px_0px_rgba(0,0,0,0.16)] z-20">
                             <p class="font-sans font-semibold text-[18px] tracking-[1.44px] text-[#4b4d4c]">3 BHK</p>
                         </div>
                         <button class="view-plan-btn relative z-10 border border-[#4b4d4c] rounded-full px-[20px] py-[8px] min-h-[48px] bg-white text-[#4b4d4c] font-semibold text-[16px] shadow-sm hover:shadow-md hover:bg-[#4b4d4c] hover:text-white transition-all duration-300" data-plan="./assets/images/plan-3bhk.webp" data-title="3 BHK Floor Plan">View Plan</button>
                     </div>
                     <div class="relative flex flex-col items-center justify-center w-full sm:w-[calc(50%-12px)] lg:w-[397.333px] h-[320px] p-[40px] rounded-[24px] bg-white shadow-lg">
-                        <img src="./assets/images/plan-3.5bhk.webp" alt="3.5 BHK" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
+                        <img loading="lazy" decoding="async" src="./assets/images/plan-3.5bhk.webp" alt="3.5 BHK" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
                         <div class="absolute top-[-24px] left-1/2 -translate-x-1/2 bg-white rounded-[100px] px-[24px] py-[12px] shadow-[1px_3px_8px_0px_rgba(0,0,0,0.16)] z-20">
                             <p class="font-sans font-semibold text-[18px] tracking-[1.44px] text-[#4b4d4c]">3.5 BHK</p>
                         </div>
                         <button class="view-plan-btn relative z-10 border border-[#4b4d4c] rounded-full px-[20px] py-[8px] min-h-[48px] bg-white text-[#4b4d4c] font-semibold text-[16px] shadow-sm hover:shadow-md hover:bg-[#4b4d4c] hover:text-white transition-all duration-300" data-plan="./assets/images/plan-3.5bhk.webp" data-title="3.5 BHK Floor Plan">View Plan</button>
                     </div>
                     <div class="relative flex flex-col items-center justify-center w-full sm:w-[calc(50%-12px)] lg:w-[397.333px] h-[320px] p-[40px] rounded-[24px] bg-white shadow-lg">
-                        <img src="./assets/images/plan-4bhk.webp" alt="4 BHK" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
+                        <img loading="lazy" decoding="async" src="./assets/images/plan-4bhk.webp" alt="4 BHK" class="absolute inset-0 w-full h-full object-cover rounded-[24px]">
                         <div class="absolute top-[-24px] left-1/2 -translate-x-1/2 bg-white rounded-[100px] px-[24px] py-[12px] shadow-[1px_3px_8px_0px_rgba(0,0,0,0.16)] z-20">
                             <p class="font-sans font-semibold text-[18px] tracking-[1.44px] text-[#4b4d4c]">4 BHK</p>
                         </div>
@@ -725,7 +801,7 @@
                     <p class="font-sans italic text-[18px] leading-[1.45] tracking-[2.88px] uppercase text-center w-full">View images of homes, amenities, and the surrounding environment.</p>
                 </div>
                 <div class="relative w-full aspect-[1571/102]">
-                    <img src="./assets/images/divider-ornament.webp" alt="" class="absolute inset-0 w-full h-full object-cover">
+                    <img loading="lazy" decoding="async" src="./assets/images/divider-ornament.webp" alt="" class="absolute inset-0 w-full h-full object-cover">
                 </div>
                 
 
@@ -733,27 +809,27 @@
                 <div class="flex flex-col gap-[24px] w-full pt-[40px]">
                     <!-- Row 1: 4 Images (Wide, Narrow, Wide, Narrow) -->
                     <div class="grid grid-cols-1 md:grid-cols-6 gap-[24px]">
-                        <img src="./assets/images/gallery-01.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-02.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-1 hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-03.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-04.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-1 hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-01.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-02.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-1 hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-03.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-04.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-1 hover:scale-[1.02] transition-transform duration-300">
                     </div>
                     
                     <!-- Row 2: 5 Images (Equal) -->
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-[24px]">
-                        <img src="./assets/images/gallery-05.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-06.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-07.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-08.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-09.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-05.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-06.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-07.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-08.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-09.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] hover:scale-[1.02] transition-transform duration-300">
                     </div>
                     
                     <!-- Row 3: 4 Images (Wide, Wide, Wide, Narrow) -->
                     <div class="grid grid-cols-1 md:grid-cols-7 gap-[24px]">
-                        <img src="./assets/images/gallery-10.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-11.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-12.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
-                        <img src="./assets/images/gallery-13.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-1 hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-10.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-11.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-12.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-2 hover:scale-[1.02] transition-transform duration-300">
+                        <img loading="lazy" decoding="async" src="./assets/images/gallery-13.webp" alt="Gallery" class="w-full h-[280px] object-cover rounded-[24px] md:col-span-1 hover:scale-[1.02] transition-transform duration-300">
                     </div>
                 </div>
             </div>
@@ -770,11 +846,11 @@
                         <p class="font-sans italic text-[18px] leading-[1.45] tracking-[2.88px] uppercase text-center w-full">Where Quality Meets Functionality</p>
                     </div>
                     <div class="relative w-full aspect-[1571/102]">
-                        <img src="./assets/images/divider-ornament.webp" alt="" class="absolute inset-0 w-full h-full object-cover">
+                        <img loading="lazy" decoding="async" src="./assets/images/divider-ornament.webp" alt="" class="absolute inset-0 w-full h-full object-cover">
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[24px] w-full">
                         <div class="bg-white border border-[rgba(22,22,22,0.12)] rounded-[24px] overflow-hidden shadow-[1px_3px_24px_0px_rgba(0,0,0,0.1)] hover-lift transition-all duration-300">
-                            <img src="./assets/images/specs-doors.webp" alt="Doors, Windows & Railings" class="w-full h-[280px] object-cover">
+                            <img loading="lazy" decoding="async" src="./assets/images/specs-doors.webp" alt="Doors, Windows & Railings" class="w-full h-[280px] object-cover">
                             <div class="p-[24px] pb-[40px] flex flex-col gap-[24px]">
                                 <p class="font-sans font-semibold text-[18px] tracking-[0.72px] uppercase text-center">Doors, Windows & Railings</p>
                                 <ul class="flex flex-col gap-[12px] text-[18px] text-[#4b4d4c]">
@@ -786,7 +862,7 @@
                             </div>
                         </div>
                         <div class="bg-white border border-[rgba(22,22,22,0.12)] rounded-[24px] overflow-hidden shadow-[1px_3px_24px_0px_rgba(0,0,0,0.1)] hover-lift transition-all duration-300">
-                            <img src="./assets/images/specs-walls.webp" alt="Walls" class="w-full h-[280px] object-cover">
+                            <img loading="lazy" decoding="async" src="./assets/images/specs-walls.webp" alt="Walls" class="w-full h-[280px] object-cover">
                             <div class="p-[24px] pb-[40px] flex flex-col gap-[24px]">
                                 <p class="font-sans font-semibold text-[18px] tracking-[0.72px] uppercase text-center">Walls</p>
                                 <ul class="flex flex-col gap-[12px] text-[18px] text-[#4b4d4c]">
@@ -796,7 +872,7 @@
                             </div>
                         </div>
                         <div class="bg-white border border-[rgba(22,22,22,0.12)] rounded-[24px] overflow-hidden shadow-[1px_3px_24px_0px_rgba(0,0,0,0.1)] hover-lift transition-all duration-300">
-                            <img src="./assets/images/specs-sanitary.webp" alt="CP & Sanitary fittings" class="w-full h-[280px] object-cover">
+                            <img loading="lazy" decoding="async" src="./assets/images/specs-sanitary.webp" alt="CP & Sanitary fittings" class="w-full h-[280px] object-cover">
                             <div class="p-[24px] pb-[40px] flex flex-col gap-[24px]">
                                 <p class="font-sans font-semibold text-[18px] tracking-[0.72px] uppercase text-center">CP & Sanitary fittings</p>
                                 <ul class="flex flex-col gap-[12px] text-[18px] text-[#4b4d4c]">
@@ -805,7 +881,7 @@
                             </div>
                         </div>
                         <div class="bg-white border border-[rgba(22,22,22,0.12)] rounded-[24px] overflow-hidden shadow-[1px_3px_24px_0px_rgba(0,0,0,0.1)] hover-lift transition-all duration-300">
-                            <img src="./assets/images/specs-floor.webp" alt="Floor Finishes" class="w-full h-[280px] object-cover">
+                            <img loading="lazy" decoding="async" src="./assets/images/specs-floor.webp" alt="Floor Finishes" class="w-full h-[280px] object-cover">
                             <div class="p-[24px] pb-[40px] flex flex-col gap-[24px]">
                                 <p class="font-sans font-semibold text-[18px] tracking-[0.72px] uppercase text-center">Floor Finishes</p>
                                 <ul class="flex flex-col gap-[12px] text-[18px] text-[#4b4d4c]">
@@ -877,7 +953,7 @@
         <div class="absolute bottom-0 left-0 right-0 h-[542px] bg-[#ed3237]"></div>
         <div class="relative z-10 flex flex-col gap-[60px] items-center">
             <div class="relative w-full max-w-[1000px] h-[500px] rounded-[40px] overflow-hidden p-6 md:p-[40px] lg:p-[60px] flex items-center justify-center group cursor-pointer" onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')">
-                <img src="./assets/images/footer-virtual-tour.webp" alt="Virtual Tour" class="absolute inset-0 w-full h-full object-cover rounded-[40px] group-hover:scale-105 transition-transform duration-500">
+                <img loading="lazy" decoding="async" src="./assets/images/footer-virtual-tour.webp" alt="Virtual Tour" class="absolute inset-0 w-full h-full object-cover rounded-[40px] group-hover:scale-105 transition-transform duration-500">
                 <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] bg-gradient-to-b from-transparent to-black px-[24px] pt-[40px] pb-[24px] flex items-end justify-center">
                     <p class="font-serif text-[36px] text-white">Take The Virtual Tour</p>
                 </div>
